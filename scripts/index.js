@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { Telegraf, Scenes, session } = require('telegraf')
 const TelegramToken = process.env.TELEGRAM_TOKEN
-const db = require('./mongoDB')
+const db = require('./database')
 const text = require('./text')
 
 const bot = new Telegraf(TelegramToken)

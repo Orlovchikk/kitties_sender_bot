@@ -1,6 +1,6 @@
 const { Composer } = require("telegraf")
 const composer = new Composer
-const db = require('../mongoDB')
+const db = require('../database')
 const text = require('../text')
 
 composer.start(async (ctx) => {

@@ -1,7 +1,7 @@
 const { Composer, Markup } = require("telegraf")
 const composer = new Composer
 const GiphyToken = process.env.GIPHY_TOKEN
-const db = require('../mongoDB')
+const db = require('../database')
 const text = require('../text')
 
 const ChoiceInlineKeyboard = Markup.inlineKeyboard([[

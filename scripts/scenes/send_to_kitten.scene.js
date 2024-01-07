@@ -1,6 +1,6 @@
 const Scenes = require('telegraf/scenes')
 const { Markup } = require("telegraf")
-const db = require('../mongoDB')
+const db = require('../database')
 const text = require('../text')
 
 module.exports = new Scenes.WizardScene(
