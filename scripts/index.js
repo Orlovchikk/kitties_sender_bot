@@ -26,7 +26,7 @@ bot.command('send_to_kitten', async (ctx) => {
   }
 })
 
-bot.launch().then(console.log('рестарт'))
+bot.launch()
 
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
