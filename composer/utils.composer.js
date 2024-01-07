@@ -1,9 +1,7 @@
 const { Composer, Markup } = require("telegraf")
 const composer = new Composer
 const GiphyToken = process.env.GIPHY_TOKEN
-
-//lets imagine that it is a real database ^.^
-const DB = require('../users_database.json').USERS
+const db = require('../mongoDB')
 
 const ChoiceInlineKeyboard = Markup.inlineKeyboard([
   Markup.button.callback('пикча', 'pic'),
@@ -50,14 +48,18 @@ composer.action('gif', async (ctx) => {
   }
 })
 
-composer.command('kitten', (ctx) => {
-  ctx.reply(`отправь это своему котику:`)
-  ctx.reply(`https://t.me/kitties_sender_bot?start=${ctx.message.from.id} - ссылочка для обмена милотой в боте`, {disable_web_page_preview: true})
+composer.command('kitten', async (ctx) => {
+  const user = await db.user(ctx.message.from.id)
+  await ctx.reply(`отправь это своему котику:`)
+  await ctx.reply(`https://t.me/kitties_sender_bot?start=${user['id']} - ссылочка для обмена милотой в боте`, { disable_web_page_preview: true })
+  if (user['kitten']) {
+    await ctx.reply(`⚠️ осторожно, может быть привязан только один котик ⚠️\nесли кто-то нажмет на ссылочку, ваша ниточка разорвется!`)
+  }
 })
 
 composer.command('kittens_language', (ctx) => {
   try {
-    ctx.reply('≽^•⩊•^≼ \nнажми на ссылочку для установки котячего языка\nhttps://t.me/setlanguage/kittens-cats', {disable_web_page_preview: true})
+    ctx.reply('≽^•⩊•^≼ \nнажми на ссылочку для установки котячего языка\nhttps://t.me/setlanguage/kittens-cats', { disable_web_page_preview: true })
   } catch (e) {
     console.error(e)
   }

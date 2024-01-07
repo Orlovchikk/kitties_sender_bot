@@ -1,11 +1,10 @@
 const Scenes = require('telegraf/scenes')
 const { Markup } = require("telegraf")
+const db = require('../mongoDB')
 
-//lets imagine that it is a real database ^.^
-const DB = require('../users_database.json').USERS
 
 module.exports = new Scenes.WizardScene(
-  'send_to_cutie',
+  'send_to_kitten',
   async (ctx) => {
     await ctx.reply('можно отправить котику:\n> текстик\n> картиночку\n> стикерочек\n> гифочку\n       ≽^•⩊•^≼', Markup.keyboard(
       [['отмена']]
@@ -13,22 +12,22 @@ module.exports = new Scenes.WizardScene(
     return ctx.wizard.next()
   },
   async (ctx) => {
-    let userID = ctx.message.from.id,
-      msg = ctx.message
+    let msg = ctx.message,
+      sender = await db.user(ctx.message.from.id)
     if (msg.text === 'отмена') {
       ctx.reply('операция отправки милоты котику отменена', Markup.removeKeyboard())
       ctx.scene.leave()
       return
     }
-    if (msg?.text) await ctx.telegram.sendMessage(DB[userID]['kittenID'], `${msg.text}`, { entities: msg.entities })
-    else if (msg?.photo) await ctx.telegram.sendPhoto(DB[userID]['kittenID'], `${msg.photo[0].file_id}`)
-    else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(DB[userID]['kittenID'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
+    if (msg?.text) await ctx.telegram.sendMessage(sender['kitten'], `${msg.text}`, { entities: msg.entities })
+    else if (msg?.photo) await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
+    else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
     else {
       ctx.reply('это не выглядит как что-то, что я могу отправить\nпопробуй еще раз :3')
       ctx.scene.reenter()
       return
     }
-    await ctx.telegram.sendMessage(DB[userID]['kittenID'], `^^^ сообщение от @${DB[userID]['username']} ^^^`)
+    await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
     ctx.reply('(*・‿・)ノ⌒*:･ﾟ✧ отправлено!', Markup.removeKeyboard())
     return ctx.scene.leave()
   }

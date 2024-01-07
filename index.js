@@ -2,9 +2,7 @@ require('dotenv').config()
 const { Telegraf, Scenes, session } = require('telegraf')
 const TelegramToken = process.env.TELEGRAM_TOKEN
 const { Markup } = require("telegraf")
-
-//lets imagine that it is a real database ^.^
-const DB = require('./users_database.json').USERS
+const db = require('./mongoDB')
 
 const bot = new Telegraf(TelegramToken)
 
@@ -14,14 +12,15 @@ bot.use(require('./composer/start.composer'))
 // команды pic, gif, kitten, kittens_language, отзывание на 'кис'
 bot.use(require('./composer/utils.composer'))
 
-// команда send_to_cutie
-const stage = new Scenes.Stage([require('./scenes/send_to_cutie.scene')]);
+// команда send_to_kitten
+const stage = new Scenes.Stage([require('./scenes/send_to_kitten.scene')]);
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.command('send_to_cutie', (ctx) => {
+bot.command('send_to_kitten', async (ctx) => {
   try {
-    if (DB[ctx.message.from.id]['kittenID']) ctx.scene.enter('send_to_cutie')
+    const kitten = await db.user(ctx.message.from.id)
+    if (kitten['kitten']) ctx.scene.enter('send_to_kitten')
     else ctx.reply('сначала привяжи себе котика через /kitten \n^.^ ')
   } catch(e) {
     console.error(e)
