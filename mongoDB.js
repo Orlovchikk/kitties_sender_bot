@@ -10,29 +10,25 @@ const db = client.db('kittens_sender_bot')
 const collection = db.collection('users')
 
 async function addUserToDB(id, username, kitten) {
-  collection.insertOne({
+  await collection.insertOne({
     "id": id,
     "username": username,
     "kitten": kitten || null
   })
-  console.log('add')
 }
 
 async function updateKitten(id, newKitten) {
   await collection.updateOne({ id: id }, { $set: { "kitten": newKitten } })
-  console.log(id, newKitten)
 }
 
 async function deleteKitten(id) {
   await collection.updateOne({ kitten: id }, { $set: { "kitten": null } })
-  console.log(id)
 }
 
 async function user(id) {
   const user = await collection.findOne({ id: id })
   return user
 }
-
 
 client.close()
 

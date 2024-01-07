@@ -2,11 +2,14 @@ const { Composer, Markup } = require("telegraf")
 const composer = new Composer
 const GiphyToken = process.env.GIPHY_TOKEN
 const db = require('../mongoDB')
+const text = require('../text')
 
-const ChoiceInlineKeyboard = Markup.inlineKeyboard([
-  Markup.button.callback('пикча', 'pic'),
-  Markup.button.callback('гифка', 'gif')
-])
+const ChoiceInlineKeyboard = Markup.inlineKeyboard([[
+  Markup.button.callback(text.pic, 'pic'),
+  Markup.button.callback(text.gif, 'gif'),
+], [
+  Markup.button.callback(text.sendToKittenButton, 'sendToKitten')
+]])
 
 composer.command('pic', async (ctx) => {
   try {
@@ -30,7 +33,8 @@ composer.action('pic', async (ctx) => {
 
 composer.command('gif', async (ctx) => {
   try {
-    const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GiphyToken}&tag='cat'`);
+    const search = ctx.message.text.slice(5)
+    const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GiphyToken}&tag='cat ${search}'`);
     const json = await response.json();
     ctx.replyWithAnimation(json.data.images.original.url, ChoiceInlineKeyboard)
   } catch (e) {
@@ -39,10 +43,27 @@ composer.command('gif', async (ctx) => {
 })
 composer.action('gif', async (ctx) => {
   try {
-    const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GiphyToken}&tag='cat christmas'`);
+    const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${GiphyToken}&tag='cat'`);
     const json = await response.json();
-    ctx.replyWithAnimation(json.data.images.original.url, ChoiceInlineKeyboard)
-    ctx.telegram.editMessageReplyMarkup(ctx.chat.id, ctx.callbackQuery.message.message_id, null);
+    await ctx.replyWithAnimation(json.data.images.original.url, ChoiceInlineKeyboard)
+    await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, ctx.callbackQuery.message.message_id, null);
+  } catch (e) {
+    console.error(e)
+  }
+})
+
+composer.action('sendToKitten', async (ctx) => {
+  try {
+    const msg = ctx.update.callback_query.message
+    const kitten = await db.user(ctx.update.callback_query.from.id)
+    if (kitten['kitten']) {
+      const sender = await db.user(ctx.update.callback_query.from.id)
+      if (msg?.photo) await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
+      else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
+      await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
+      await ctx.reply(text.successful)
+    } else ctx.reply(text.sendToKittenError)
+    await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, ctx.callbackQuery.message.message_id, null);
   } catch (e) {
     console.error(e)
   }
@@ -53,13 +74,14 @@ composer.command('kitten', async (ctx) => {
   await ctx.reply(`отправь это своему котику:`)
   await ctx.reply(`https://t.me/kitties_sender_bot?start=${user['id']} - ссылочка для обмена милотой в боте`, { disable_web_page_preview: true })
   if (user['kitten']) {
-    await ctx.reply(`⚠️ осторожно, может быть привязан только один котик ⚠️\nесли кто-то нажмет на ссылочку, ваша ниточка разорвется!`)
+    const kitten = await db.user(user['kitten'])
+    ctx.reply(`⚠️ осторожно, ты уже привязан к @${kitten['username']} ⚠️\nесли кто-то нажмет на ссылочку, ваша ниточка разорвется!`)
   }
 })
 
 composer.command('kittens_language', (ctx) => {
   try {
-    ctx.reply('≽^•⩊•^≼ \nнажми на ссылочку для установки котячего языка\nhttps://t.me/setlanguage/kittens-cats', { disable_web_page_preview: true })
+    ctx.reply(text.language, { disable_web_page_preview: true })
   } catch (e) {
     console.error(e)
   }
@@ -67,11 +89,10 @@ composer.command('kittens_language', (ctx) => {
 
 composer.hears('кис кис', async (ctx) => {
   try {
-    ctx.replyWithPhoto('https://i.pinimg.com/736x/3d/fa/4e/3dfa4e645c9866a7e18abfb1161af9f6.jpg')
+    await ctx.replyWithPhoto('https://i.pinimg.com/736x/3d/fa/4e/3dfa4e645c9866a7e18abfb1161af9f6.jpg')
   } catch (e) {
     console.error(e)
   }
 })
-
 
 module.exports = composer

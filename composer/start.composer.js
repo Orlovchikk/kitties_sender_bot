@@ -1,24 +1,18 @@
 const { Composer } = require("telegraf")
 const composer = new Composer
-const commands = require('../text')
 const db = require('../mongoDB')
+const text = require('../text')
 
 composer.start(async (ctx) => {
   try {
-    let kitten = Number(ctx.message.text.slice(7)),
+    const kitten = Number(ctx.message.text.slice(7)),
       user = ctx.message.from
-
-    await ctx.reply(
-      `привет котик 🥰
-    \n/pic чтобы получить рандомную картинку
-    \n/gif чтобы получить гифку с котиком
-    \n/kitten - привязать котика и пересылать ему картиночки
-    \n/help чтобы посмотреть другие команды`
-    )
+    await ctx.reply(text.start)
     if (kitten) {
       if (ctx.message.from.id !== kitten) {
         try {
-          if (await db.user(user.id)) {
+          const userDB = await db.user(user.id)
+          if (userDB) {
             await db.deleteKitten(user.id)
             await db.deleteKitten(kitten)
             await db.updateKitten(kitten, user.id)
@@ -29,13 +23,13 @@ composer.start(async (ctx) => {
             await db.addUserToDB(user.id, user.username, kitten)
             await db.updateKitten(kitten, user.id)
           }
-          ctx.telegram.sendMessage(kitten, `котик привязан!\nможешь попробовать отправить ему сообщение через /send_to_kitten`)
-          ctx.reply(`тебя привязали!\nможешь попробовать отправить второму котику сообщение через /send_to_kitten`)
+          ctx.telegram.sendMessage(kitten, text.kitten)
+          ctx.reply(text.kitten2)
         } catch (e) {
           console.error(e)
         }
       } else {
-        ctx.reply('ты не можешь привязать самого себя :(')
+        ctx.reply(text.kittenError)
       }
     } else if (! await db.user(user.id)) {
       db.addUserToDB(user.id, user.username)
@@ -47,7 +41,7 @@ composer.start(async (ctx) => {
 
 composer.help((ctx) => {
   try {
-    ctx.reply(`воть все доступные команды:\n${text.commands} так же попробуй позвать котика по кис кис 🤭`)
+    ctx.replyWithHTML(`воть все доступные команды:\n${text.commands} так же попробуй позвать котика по кис кис 🤭`)
   } catch (e) {
     console.error(e)
   }

@@ -1,34 +1,32 @@
 const Scenes = require('telegraf/scenes')
 const { Markup } = require("telegraf")
 const db = require('../mongoDB')
-
+const text = require('../text')
 
 module.exports = new Scenes.WizardScene(
   'send_to_kitten',
   async (ctx) => {
-    await ctx.reply('можно отправить котику:\n> текстик\n> картиночку\n> стикерочек\n> гифочку\n       ≽^•⩊•^≼', Markup.keyboard(
+    await ctx.reply(text.sendToKitten, Markup.keyboard(
       [['отмена']]
     ).resize())
     return ctx.wizard.next()
   },
   async (ctx) => {
-    let msg = ctx.message,
+    const msg = ctx.message,
       sender = await db.user(ctx.message.from.id)
     if (msg.text === 'отмена') {
-      ctx.reply('операция отправки милоты котику отменена', Markup.removeKeyboard())
-      ctx.scene.leave()
-      return
+      ctx.reply(text.cancel, Markup.removeKeyboard())
+      return ctx.scene.leave()
     }
     if (msg?.text) await ctx.telegram.sendMessage(sender['kitten'], `${msg.text}`, { entities: msg.entities })
     else if (msg?.photo) await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
     else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
     else {
-      ctx.reply('это не выглядит как что-то, что я могу отправить\nпопробуй еще раз :3')
-      ctx.scene.reenter()
-      return
+      await ctx.reply(text.sendError, Markup.removeKeyboard())
+      return ctx.scene.reenter()
     }
     await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
-    ctx.reply('(*・‿・)ノ⌒*:･ﾟ✧ отправлено!', Markup.removeKeyboard())
+    await ctx.reply(text.successful, Markup.removeKeyboard())
     return ctx.scene.leave()
   }
 )
