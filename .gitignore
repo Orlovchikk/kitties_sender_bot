@@ -2,3 +2,4 @@
 .env
 .idea
 scripts/cutecats
+scripts/composer/timer.composer.js

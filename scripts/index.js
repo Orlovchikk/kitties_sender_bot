@@ -12,6 +12,9 @@ bot.use(require('./composer/start.composer'))
 // commands pic, gif, kitten, kittens_language, 'кис'
 bot.use(require('./composer/utils.composer'))
 
+// test command
+bot.use(require('./composer/timer.composer'))
+
 // command send_to_kitten 
 const stage = new Scenes.Stage([require('./scenes/send_to_kitten.scene')]);
 bot.use(session());
