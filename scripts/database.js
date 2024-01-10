@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const url = process.env.DATABASE_URL;
 
 const client = new MongoClient(url);
@@ -18,11 +18,10 @@ async function addUserToDB(id, username, kitten) {
 }
 
 async function updateKitten(id, newKitten) {
-  await collection.updateOne({ id: id }, { $set: { "kitten": newKitten } })
-}
-
-async function deleteKitten(id) {
   await collection.updateOne({ kitten: id }, { $set: { "kitten": null } })
+  await collection.updateOne({ kitten: newKitten }, { $set: { "kitten": null } })
+  await collection.updateOne({ id: id }, { $set: { "kitten": newKitten } })
+  await collection.updateOne({ id: newKitten }, { $set: { "kitten": id } })
 }
 
 async function user(id) {
@@ -34,5 +33,4 @@ client.close()
 
 module.exports.addUserToDB = addUserToDB,
   module.exports.user = user,
-  module.exports.updateKitten = updateKitten,
-  module.exports.deleteKitten = deleteKitten
+  module.exports.updateKitten = updateKitten

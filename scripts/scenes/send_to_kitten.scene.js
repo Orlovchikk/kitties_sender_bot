@@ -1,9 +1,13 @@
-const Scenes = require('telegraf/scenes')
-const { Markup } = require("telegraf")
+const { Composer, Markup, Scenes, session } = require("telegraf")
+const composer = new Composer
 const db = require('../database')
 const text = require('../text')
 
-module.exports = new Scenes.WizardScene(
+const sendToKittenInlineKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback(text.sendToKittenResponse, 'sendToKittenResponse')]
+])
+
+const sendToKittenScene = new Scenes.WizardScene(
   'send_to_kitten',
   async (ctx) => {
     await ctx.reply(text.sendToKitten, Markup.keyboard(
@@ -18,15 +22,47 @@ module.exports = new Scenes.WizardScene(
       ctx.reply(text.cancel, Markup.removeKeyboard())
       return ctx.scene.leave()
     }
-    if (msg?.text) await ctx.telegram.sendMessage(sender['kitten'], `${msg.text}`, { entities: msg.entities })
-    else if (msg?.photo) await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
-    else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
+    if (msg?.text) {
+      await ctx.telegram.sendMessage(sender['kitten'], `${msg.text}`, { entities: msg.entities })
+      await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`, sendToKittenInlineKeyboard)
+      await ctx.reply(text.successful, Markup.removeKeyboard())
+    }
+    else if (msg?.photo) {
+      await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
+      await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`, sendToKittenInlineKeyboard)
+      await ctx.reply(text.successful, Markup.removeKeyboard())
+    }
+    else if (msg?.sticker || msg?.animation) {
+      await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`, )
+      await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`, sendToKittenInlineKeyboard)
+      await ctx.reply(text.successful, Markup.removeKeyboard())
+    }
     else {
       await ctx.reply(text.sendError, Markup.removeKeyboard())
       return ctx.scene.reenter()
     }
-    await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
-    await ctx.reply(text.successful, Markup.removeKeyboard())
     return ctx.scene.leave()
   }
 )
+
+const stage = new Scenes.Stage([sendToKittenScene]);
+
+composer.use(session());
+composer.use(stage.middleware());
+
+composer.command('send_to_kitten', async (ctx) => {
+  try {
+    const kitten = await db.user(ctx.message.from.id)
+    if (kitten['kitten']) ctx.scene.enter('send_to_kitten')
+    else ctx.reply(text.sendToKittenError)
+  } catch(e) {
+    console.error(e)
+  }
+})
+
+composer.action('sendToKittenResponse', async (ctx) => {
+  await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, ctx.callbackQuery.message.message_id, null);
+  ctx.scene.enter('send_to_kitten')
+})
+
+module.exports = composer

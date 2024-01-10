@@ -16,5 +16,6 @@
   "successful":"(*・‿・)ノ⌒*:･ﾟ✧ отправлено!",
   "receiver":"^^^ сообщение от @${DB[userID]['username']} ^^^",
   "sendToKittenError":"сначала привяжи себе котика через /kitten \n^.^ ",
-  "sendToKittenButton":"переслать котику"
+  "sendToKittenButton":"переслать котику",
+  "sendToKittenResponse": "ответить"
 }

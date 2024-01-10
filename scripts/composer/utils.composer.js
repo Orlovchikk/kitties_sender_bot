@@ -55,13 +55,18 @@ composer.action('gif', async (ctx) => {
 composer.action('sendToKitten', async (ctx) => {
   try {
     const msg = ctx.update.callback_query.message
-    const kitten = await db.user(ctx.update.callback_query.from.id)
-    if (kitten['kitten']) {
-      const sender = await db.user(ctx.update.callback_query.from.id)
-      if (msg?.photo) await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
-      else if (msg?.sticker || msg?.animation) await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
-      await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
-      await ctx.reply(text.successful)
+    const sender = await db.user(ctx.update.callback_query.from.id)
+    if (sender['kitten']) {
+      if (msg?.photo) {
+        await ctx.telegram.sendPhoto(sender['kitten'], `${msg.photo[0].file_id}`)
+        await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
+        await ctx.reply(text.successful)
+      }
+      else if (msg?.sticker || msg?.animation) {
+        await ctx.telegram.sendAnimation(sender['kitten'], `${msg?.sticker?.file_id || msg?.animation?.file_id}`)
+        await ctx.telegram.sendMessage(sender['kitten'], `^^^ сообщение от @${sender['username']} ^^^`)
+        await ctx.reply(text.successful)
+      }
     } else ctx.reply(text.sendToKittenError)
     await ctx.telegram.editMessageReplyMarkup(ctx.chat.id, ctx.callbackQuery.message.message_id, null);
   } catch (e) {
@@ -87,7 +92,7 @@ composer.command('kittens_language', (ctx) => {
   }
 })
 
-composer.hears('кис кис', async (ctx) => {
+composer.hears(['кис кис', 'кис', 'кис кис кис', 'кискис', 'кискискис'], async (ctx) => {
   try {
     await ctx.replyWithPhoto('https://i.pinimg.com/736x/3d/fa/4e/3dfa4e645c9866a7e18abfb1161af9f6.jpg')
   } catch (e) {
