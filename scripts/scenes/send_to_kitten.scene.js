@@ -15,7 +15,9 @@ const sendToKittenScene = new Scenes.WizardScene(
   },
   async (ctx) => {
     const msg = ctx.message,
-      sender = await db.user(ctx.message.from.id);
+      sender = await db.user(
+        ctx.message.from.id || ctx.callbackQuery.message.from.id
+      );
     if (msg.text === "отмена") {
       ctx.reply(text.cancel, Markup.removeKeyboard());
       return ctx.scene.leave();
