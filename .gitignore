@@ -3,3 +3,4 @@
 .idea
 scripts/cutecats
 scripts/composer/timer.composer.js
+.prettierignore

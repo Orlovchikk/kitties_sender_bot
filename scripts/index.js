@@ -1,22 +1,22 @@
-require('dotenv').config()
-const { Telegraf} = require('telegraf')
-const TelegramToken = process.env.TELEGRAM_TOKEN
+require("dotenv").config();
+const { Telegraf } = require("telegraf");
+const TelegramToken = process.env.TELEGRAM_TOKEN;
 
-const bot = new Telegraf(TelegramToken)
+const bot = new Telegraf(TelegramToken);
 
 // comands start и help
-bot.use(require('./composer/start.composer'))
+bot.use(require("./composer/start.composer.js"));
 
 // commands pic, gif, kitten, kittens_language, 'кис кис'
-bot.use(require('./composer/utils.composer'))
+bot.use(require("./composer/utils.composer.js"));
 
 // test command
-bot.use(require('./composer/timer.composer'))
+bot.use(require("./composer/timer.composer.js"));
 
-// command send_to_kitten 
-bot.use(require('./scenes/send_to_kitten.scene'))
+// command send_to_kitten
+bot.use(require("./scenes/send_to_kitten.scene.js"));
 
-bot.launch()
+bot.launch();
 
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
