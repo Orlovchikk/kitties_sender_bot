@@ -5,10 +5,7 @@ const db = require("../database.js");
 const text = require("../text.json");
 
 const ChoiceInlineKeyboard = Markup.inlineKeyboard([
-  [
-    Markup.button.callback(text.pic, "pic"),
-    Markup.button.callback(text.gif, "gif"),
-  ],
+  [Markup.button.callback(text.pic, "pic"), Markup.button.callback(text.gif, "gif")],
   [Markup.button.callback(text.sendToKittenButton, "sendToKitten")],
 ]);
 
@@ -54,10 +51,7 @@ composer.action("gif", async (ctx) => {
       `https://api.giphy.com/v1/gifs/random?api_key=${GiphyToken}&tag='cat'`
     );
     const json = await response.json();
-    await ctx.replyWithAnimation(
-      json.data.images.original.url,
-      ChoiceInlineKeyboard
-    );
+    await ctx.replyWithAnimation(json.data.images.original.url, ChoiceInlineKeyboard);
     await ctx.telegram.editMessageReplyMarkup(
       ctx.chat.id,
       ctx.callbackQuery.message.message_id,
@@ -74,24 +68,15 @@ composer.action("sendToKitten", async (ctx) => {
     const sender = await db.user(ctx.update.callback_query.from.id);
     if (sender["kitten"]) {
       if (msg?.photo) {
-        await ctx.telegram.sendPhoto(
-          sender["kitten"],
-          `${msg.photo[0].file_id}`
-        );
-        await ctx.telegram.sendMessage(
-          sender["kitten"],
-          `^^^ сообщение от @${sender["username"]} ^^^`
-        );
+        await ctx.telegram.sendPhoto(sender["kitten"], `${msg.photo[0].file_id}`);
+        await ctx.telegram.sendMessage(sender["kitten"], eval("`" + text.receiver + "`"));
         await ctx.reply(text.successful);
       } else if (msg?.sticker || msg?.animation) {
         await ctx.telegram.sendAnimation(
           sender["kitten"],
           `${msg?.sticker?.file_id || msg?.animation?.file_id}`
         );
-        await ctx.telegram.sendMessage(
-          sender["kitten"],
-          `^^^ сообщение от @${sender["username"]} ^^^`
-        );
+        await ctx.telegram.sendMessage(sender["kitten"], eval("`" + text.receiver + "`"));
         await ctx.reply(text.successful);
       }
     } else ctx.reply(text.sendToKittenError);
@@ -107,38 +92,44 @@ composer.action("sendToKitten", async (ctx) => {
 
 composer.command("kitten", async (ctx) => {
   const user = await db.user(ctx.message.from.id);
-  await ctx.reply(`отправь это своему котику:`);
-  await ctx.reply(
-    `https://t.me/kitties_sender_bot?start=${user["id"]} - ссылочка для обмена милотой в боте`,
-    { disable_web_page_preview: true }
-  );
+  await ctx.reply(text.newKitten);
+  await ctx.reply(eval("`" + text.kittenLink + "`"), {
+    disable_web_page_preview: true,
+  });
   if (user["kitten"]) {
     const kitten = await db.user(user["kitten"]);
-    ctx.reply(
-      `⚠️ осторожно, ты уже привязан к @${kitten["username"]} ⚠️\nесли кто-то нажмет на ссылочку, ваша ниточка разорвется!`
-    );
+    ctx.reply(eval("`" + text.kittenWarning + "`"));
   }
 });
 
 composer.command("kittens_language", (ctx) => {
   try {
-    ctx.reply(text.language, { disable_web_page_preview: true });
+    ctx.reply(text.language, {
+      disable_web_page_preview: true,
+    });
   } catch (e) {
     console.error(e);
   }
 });
 
-composer.hears(
-  ["кис кис", "кис", "кис кис кис", "кискис", "кискискис"],
-  async (ctx) => {
-    try {
-      await ctx.replyWithPhoto(
-        "https://i.pinimg.com/736x/3d/fa/4e/3dfa4e645c9866a7e18abfb1161af9f6.jpg"
-      );
-    } catch (e) {
-      console.error(e);
-    }
+composer.command("kittens_stickers", (ctx) => {
+  try {
+    ctx.reply(text.stikerpack, {
+      disable_web_page_preview: true,
+    });
+  } catch (e) {
+    console.error(e);
   }
-);
+});
+
+composer.hears(["кис кис", "кис", "кис кис кис", "кискис", "кискискис"], async (ctx) => {
+  try {
+    await ctx.replyWithPhoto(
+      "https://i.pinimg.com/736x/3d/fa/4e/3dfa4e645c9866a7e18abfb1161af9f6.jpg"
+    );
+  } catch (e) {
+    console.error(e);
+  }
+});
 
 module.exports = composer;

@@ -18,13 +18,8 @@ composer.start(async (ctx) => {
           await db.updateKitten(kitten, user.id);
         }
         const kittenUsername = await db.user(kitten);
-        ctx.telegram.sendMessage(
-          kitten,
-          `теперь вы с @${user.username} связаны!\nможешь попробовать отправить второму котику сообщение через /send_to_kitten`
-        );
-        ctx.reply(
-          `теперь вы с @${kittenUsername["username"]} связаны!\nможешь попробовать отправить второму котику сообщение через /send_to_kitten`
-        );
+        ctx.telegram.sendMessage(kitten, eval("`" + text.kitten + "`"));
+        ctx.reply(eval("`" + text.kitten2 + "`"));
       } else {
         ctx.reply(text.kittenError);
       }
@@ -38,9 +33,7 @@ composer.start(async (ctx) => {
 
 composer.help((ctx) => {
   try {
-    ctx.replyWithHTML(
-      `воть все доступные команды:\n${text.commands} так же попробуй позвать котика по кис кис 🤭`
-    );
+    ctx.reply(eval("`" + text.help + "`"));
   } catch (e) {
     console.error(e);
   }

@@ -7,11 +7,8 @@ const bot = new Telegraf(TelegramToken);
 // comands start и help
 bot.use(require("./composer/start.composer.js"));
 
-// commands pic, gif, kitten, kittens_language, 'кис кис'
+// commands pic, gif, kitten, kittens_language, kittens_stickers, 'кис кис'
 bot.use(require("./composer/utils.composer.js"));
-
-// test command
-bot.use(require("./composer/timer.composer.js"));
 
 // command send_to_kitten
 bot.use(require("./scenes/send_to_kitten.scene.js"));

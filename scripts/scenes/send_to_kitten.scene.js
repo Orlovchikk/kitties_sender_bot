@@ -15,9 +15,7 @@ const sendToKittenScene = new Scenes.WizardScene(
   },
   async (ctx) => {
     const msg = ctx.message,
-      sender = await db.user(
-        ctx.message.from.id || ctx.callbackQuery.message.from.id
-      );
+      sender = await db.user(ctx.message.from.id || ctx.callbackQuery.message.from.id);
     if (msg.text === "отмена") {
       ctx.reply(text.cancel, Markup.removeKeyboard());
       return ctx.scene.leave();
@@ -28,7 +26,7 @@ const sendToKittenScene = new Scenes.WizardScene(
       });
       await ctx.telegram.sendMessage(
         sender["kitten"],
-        `^^^ сообщение от @${sender["username"]} ^^^`,
+        eval("`" + text.receiver + "`"),
         sendToKittenInlineKeyboard
       );
       await ctx.reply(text.successful, Markup.removeKeyboard());
@@ -36,7 +34,7 @@ const sendToKittenScene = new Scenes.WizardScene(
       await ctx.telegram.sendPhoto(sender["kitten"], `${msg.photo[0].file_id}`);
       await ctx.telegram.sendMessage(
         sender["kitten"],
-        `^^^ сообщение от @${sender["username"]} ^^^`,
+        eval("`" + text.receiver + "`"),
         sendToKittenInlineKeyboard
       );
       await ctx.reply(text.successful, Markup.removeKeyboard());
@@ -47,7 +45,7 @@ const sendToKittenScene = new Scenes.WizardScene(
       );
       await ctx.telegram.sendMessage(
         sender["kitten"],
-        `^^^ сообщение от @${sender["username"]} ^^^`,
+        eval("`" + text.receiver + "`"),
         sendToKittenInlineKeyboard
       );
       await ctx.reply(text.successful, Markup.removeKeyboard());

@@ -2,6 +2,6 @@
 .env
 .idea
 scripts/cutecats
-scripts/composer/timer.composer.js
 .prettierignore
 ngrok.exe
+index.txt
