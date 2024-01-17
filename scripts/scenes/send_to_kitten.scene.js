@@ -72,6 +72,39 @@ composer.command("send_to_kitten", async (ctx) => {
   }
 });
 
+composer.action("sendToKitten", async (ctx) => {
+  try {
+    const msg = ctx.update.callback_query.message;
+    const sender = await db.user(ctx.update.callback_query.from.id);
+    if (sender["kitten"]) {
+      if (msg?.photo) {
+        await ctx.telegram.sendPhoto(sender["kitten"], `${msg.photo[0].file_id}`);
+        await ctx.telegram.sendMessage(
+          sender["kitten"],
+          eval("`" + text.receiver + "`"),
+          sendToKittenInlineKeyboard
+        );
+        await ctx.reply(text.successful);
+      } else if (msg?.animation) {
+        await ctx.telegram.sendAnimation(sender["kitten"], `${msg.animation.file_id}`);
+        await ctx.telegram.sendMessage(
+          sender["kitten"],
+          eval("`" + text.receiver + "`"),
+          sendToKittenInlineKeyboard
+        );
+        await ctx.reply(text.successful);
+      }
+    } else ctx.reply(text.sendToKittenError);
+    await ctx.telegram.editMessageReplyMarkup(
+      ctx.chat.id,
+      ctx.callbackQuery.message.message_id,
+      null
+    );
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 composer.action("sendToKittenResponse", async (ctx) => {
   await ctx.telegram.editMessageReplyMarkup(
     ctx.chat.id,
