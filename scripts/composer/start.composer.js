@@ -23,7 +23,7 @@ composer.start(async (ctx) => {
         ctx.reply(text.kittenError);
       }
     } else if (!(await db.user(user.id))) {
-      db.addUserToDB(user.id, user.id, user.username || user.first_name);
+      db.addUserToDB(user.id, user.username || user.first_name);
     }
   } catch (e) {
     console.error(e);
