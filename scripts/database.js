@@ -13,6 +13,7 @@ async function addUserToDB(id, username, first_name, kitten) {
   await collection.insertOne({
     id: id,
     username: username,
+    first_name: first_name,
     kitten: kitten || null,
   });
 }
