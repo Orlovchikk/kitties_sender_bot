@@ -9,7 +9,7 @@ client.connect();
 const db = client.db("kittens_sender_bot");
 const collection = db.collection("users");
 
-async function addUserToDB(id, username, kitten) {
+async function addUserToDB(id, username, first_name, kitten) {
   await collection.insertOne({
     id: id,
     username: username,
