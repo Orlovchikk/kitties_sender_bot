@@ -17,6 +17,7 @@ composer.start(async (ctx) => {
           await db.addUserToDB(user.id, user.username, user.first_name, kitten);
           await db.updateKitten(kitten, user.id);
         }
+        const kittenUsername = await db.user(kitten);
         ctx.telegram.sendMessage(kitten, eval("`" + text.kitten + "`"));
         ctx.reply(eval("`" + text.kitten2 + "`"));
       } else {
