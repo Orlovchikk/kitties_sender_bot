@@ -15,17 +15,16 @@ let db, collection;
 
 async function connectDB() {
   try {
-    console.log("db1")
     await client.connect();
     
     await client.db("orlovchik").command({ ping: 1 });
-    console.log("Успешное подключение к MongoDB!");
+    console.log("Successful connetion to MongoDB!");
 
     db = client.db("kittens_sender_bot");
     collection = db.collection("users");
     console.log("db2");
   } catch (error) {
-    console.error("Не удалось подключиться к MongoDB", error);
+    console.error("Error connection to MongoDB", error);
     process.exit(1);
   }
 }

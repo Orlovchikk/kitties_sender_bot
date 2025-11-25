@@ -1,17 +1,16 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
-const { connectDB } = require("./database.js"); // <--- 1. Импортируем вашу функцию
+const { connectDB } = require("./database.js");
 
 const TelegramToken = process.env.TELEGRAM_TOKEN;
 const bot = new Telegraf(TelegramToken);
 
-// Создаем асинхронную функцию для запуска всего приложения
 async function start() {
   try {
-    console.log("Подключаюсь к базе данных...");
-    await connectDB(); // <--- 2. ВЫЗЫВАЕМ и дожидаемся подключения
+    console.log("Connecting to database...");
+    await connectDB();
 
-    console.log("База данных подключена. Запускаю бота...");
+    console.log("Launching the bot...");
 
     // comands start и help
     bot.use(require("./composer/start.composer.js"));
@@ -22,12 +21,11 @@ async function start() {
     // command send_to_kitten
     bot.use(require("./scenes/send_to_kitten.scene.js"));
 
-    // 3. Запускаем бота только после успешного подключения
     bot.launch(); 
-    console.log("Бот успешно запущен!");
+    console.log("Bot is up!");
 
   } catch (error) {
-    console.error("Произошла критическая ошибка при запуске:", error);
+    console.error("Error during launch:", error);
   }
 }
 
