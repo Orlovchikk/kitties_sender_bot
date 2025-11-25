@@ -12,6 +12,7 @@ const sendToKittenScene = new Scenes.WizardScene(
   async (ctx) => {
     await ctx.reply(text.sendToKitten, Markup.keyboard([["отмена"]]).resize());
     return ctx.wizard.next();
+console.log("scene1");
   },
   async (ctx) => {
     const msg = ctx.message,

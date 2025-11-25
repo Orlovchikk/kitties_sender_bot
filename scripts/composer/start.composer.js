@@ -5,6 +5,7 @@ const text = require("../text.json");
 
 composer.start(async (ctx) => {
   try {
+	console.log("cm1");
     const kitten = Number(ctx.message.text.slice(7)),
       user = ctx.message.from;
     await ctx.reply(text.start);

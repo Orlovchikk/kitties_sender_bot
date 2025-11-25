@@ -1,15 +1,41 @@
 require("dotenv").config();
-const { MongoClient } = require("mongodb");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+
 const url = process.env.DATABASE_URL;
 
-const client = new MongoClient(url);
+const client = new MongoClient(url, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
-client.connect();
+let db, collection;
 
-const db = client.db("kittens_sender_bot");
-const collection = db.collection("users");
+async function connectDB() {
+  try {
+    console.log("db1")
+    await client.connect();
+    
+    await client.db("orlovchik").command({ ping: 1 });
+    console.log("Успешное подключение к MongoDB!");
+
+    db = client.db("kittens_sender_bot");
+    collection = db.collection("users");
+    console.log("db2");
+  } catch (error) {
+    console.error("Не удалось подключиться к MongoDB", error);
+    process.exit(1);
+  }
+}
 
 async function addUserToDB(id, username, first_name, kitten) {
+  const existingUser = await collection.findOne({ id: id });
+  if (existingUser) {
+    console.log(`Пользователь с ID ${id} уже существует.`);
+    return;
+  }
   await collection.insertOne({
     id: id,
     username: username,
@@ -30,6 +56,4 @@ async function user(id) {
   return user;
 }
 
-client.close();
-
-module.exports = { addUserToDB, user, updateKitten };
+module.exports = { connectDB, addUserToDB, user, updateKitten };
